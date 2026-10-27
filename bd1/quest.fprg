@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<flowgorithm fileversion="4.2">
+    <attributes>
+        <attribute name="name" value="quest"/>
+        <attribute name="authors" value="tursaihan"/>
+        <attribute name="about" value=""/>
+        <attribute name="saved" value="2026-10-27 04:55:30 PM"/>
+        <attribute name="created" value="dHVyc2FpaGFuO0hPTUVMRVNTOzIwMjYtMTAtMjc7MDM6NTI6MDcgUE07Mjg2NA=="/>
+        <attribute name="edited" value="dHVyc2FpaGFuO0hPTUVMRVNTOzIwMjYtMTAtMjc7MDQ6NTU6MzAgUE07MTsyOTcy"/>
+    </attributes>
+    <function name="Main" type="None" variable="">
+        <parameters/>
+        <body>
+            <declare name="rate" type="Real" array="False" size=""/>
+            <declare name="hours" type="Real" array="True" size="7"/>
+            <comment text="hours 7 udriin ajilsan tsag&#13;&#10;"/>
+            <declare name="dayNames" type="String" array="True" size="7"/>
+            <comment text="udriin ners hadgalna&#13;&#10;"/>
+            <declare name="totalhours" type="Real" array="False" size=""/>
+            <declare name="maxDay" type="Integer" array="False" size=""/>
+            <declare name="deduction" type="Real" array="False" size=""/>
+            <declare name="i" type="Integer" array="False" size=""/>
+            <declare name="maxhours" type="Real" array="False" size=""/>
+            <declare name="regularhours" type="Real" array="False" size=""/>
+            <declare name="overtimehours" type="Real" array="False" size=""/>
+            <declare name="grosspay" type="Real" array="False" size=""/>
+            <declare name="netpay" type="Real" array="False" size=""/>
+            <declare name="accumulated" type="Real" array="False" size=""/>
+            <declare name="before" type="Real" array="False" size=""/>
+            <declare name="after" type="Real" array="False" size=""/>
+            <declare name="regulartoday" type="Real" array="False" size=""/>
+            <declare name="overtimetoday" type="Real" array="False" size=""/>
+            <declare name="daypay" type="Real" array="False" size=""/>
+            <assign variable="totalhours" expression="0"/>
+            <assign variable="maxDay" expression="0"/>
+            <assign variable="dayNames[0]" expression="&quot;monday&quot;"/>
+            <assign variable="dayNames[1]" expression="&quot;tuesday&quot;"/>
+            <assign variable="dayNames[2]" expression="&quot;wednesday&quot;"/>
+            <assign variable="dayNames[3]" expression="&quot;thursday&quot;"/>
+            <assign variable="dayNames[4]" expression="&quot;friday&quot;"/>
+            <assign variable="dayNames[5]" expression="&quot;saturday&quot;"/>
+            <assign variable="dayNames[6]" expression="&quot;sunday&quot;"/>
+            <comment text="daynames[0]-[6]=ner olgno&#13;&#10;&#13;&#10;"/>
+            <output expression="&quot;Hourly rate (MNT):&quot;" newline="True"/>
+            <comment text="tsagiin huls&#13;&#10;&#13;&#10;"/>
+            <do expression="rate &lt;=0">
+                <input variable="rate"/>
+                <comment text="rate = -expression wrong&#13;&#10;rate = +expression correct&#13;&#10;"/>
+            </do>
+            <output expression="&quot;Deduction percentage (0-100):&quot;" newline="True"/>
+            <do expression="deduction &lt; 0 or deduction &gt; 100">
+                <input variable="deduction"/>
+                <comment text="correct only if 0-100%&#13;&#10;"/>
+            </do>
+            <for variable="i" start="0" end="6" direction="inc" step="1">
+                <output expression="dayNames[i] &amp; &quot; hours (0-24):&quot;" newline="True"/>
+                <do expression="hours[i] &lt; 0 or hours[i] &gt; 24">
+                    <input variable="hours[i]"/>
+                    <comment text="correct only if 0-24&#13;&#10;"/>
+                </do>
+                <assign variable="totalhours" expression="totalhours + hours[i]"/>
+            </for>
+            <comment text="totalhours has all working hours within a week&#13;&#10;"/>
+            <assign variable="maxhours" expression="hours[0]"/>
+            <for variable="i" start="1" end="6" direction="inc" step="1">
+                <if expression="hours[i] &gt; maxhours">
+                    <then>
+                        <assign variable="maxhours" expression="hours[i]"/>
+                        <assign variable="maxday" expression="i"/>
+                        <comment text="ehnii udrtei bugdiin haritsuulad hamgiin ihiin songono&#13;&#10;"/>
+                    </then>
+                    <else/>
+                </if>
+            </for>
+            <comment text="hamgiin ih ajilsan tsagiin olno&#13;&#10;"/>
+            <if expression="totalhours &gt; 40">
+                <then>
+                    <assign variable="regularhours" expression="40"/>
+                    <assign variable="overtimehours" expression="totalhours - 40"/>
+                </then>
+                <else>
+                    <assign variable="regularhours" expression="totalhours"/>
+                    <assign variable="overtimehours" expression="0"/>
+                </else>
+            </if>
+            <comment text="how many overtime hours&#13;&#10;"/>
+            <assign variable="grosspay" expression="regularhours * rate + overtimehours * rate * 1.5"/>
+            <comment text="niit tsalin&#13;&#10;"/>
+            <assign variable="netpay" expression="grosspay * (1 - deduction / 100)"/>
+            <comment text="gart olgoh tsalin&#13;&#10;"/>
+            <call expression="printheader()&#13;&#10;"/>
+            <comment text="table&#13;&#10;"/>
+            <assign variable="accumulated" expression="0"/>
+            <for variable="i" start="0" end="6" direction="inc" step="1">
+                <assign variable="before" expression="accumulated"/>
+                <assign variable="after" expression="before + hours[i]"/>
+                <comment text="umnuh hongoos uldsen tsag&#13;&#10;"/>
+                <assign variable="regulartoday" expression="0"/>
+                <if expression="before &lt; 40">
+                    <then>
+                        <assign variable="regulartoday" expression="hours[i]"/>
+                        <if expression="after &gt; 40">
+                            <then>
+                                <assign variable="regulartoday" expression="40 - before"/>
+                            </then>
+                            <else/>
+                        </if>
+                    </then>
+                    <else/>
+                </if>
+                <comment text="niit ajilah ystoi tsag - ajilsan tsag&#13;&#10;"/>
+                <assign variable="overtimetoday" expression="hours[i] - regulartoday"/>
+                <assign variable="daypay" expression="regulartoday * rate + overtimetoday * rate * 1.5"/>
+                <output expression="dayNames[i] &amp; &quot; | &quot; &amp; hours[i] &amp; &quot; | &quot; &amp; dayPay" newline="True"/>
+                <assign variable="accumulated" expression="after"/>
+            </for>
+            <output expression="&quot;Total hours: &quot; &amp; totalHours" newline="True"/>
+            <output expression="&quot;Regular hours: &quot; &amp; regularHours" newline="True"/>
+            <output expression="&quot;Overtime hours: &quot; &amp; overtimeHours" newline="True"/>
+            <output expression="&quot;Gross pay: &quot; &amp; grossPay" newline="True"/>
+            <output expression="&quot;Deduction: &quot; &amp; (grossPay - netPay)" newline="True"/>
+            <output expression="&quot;Net pay: &quot; &amp; netPay" newline="True"/>
+            <output expression="&quot;Longest working day: &quot; &amp; dayNames[maxDay] &amp; &quot; (&quot; &amp; maxHours &amp; &quot; hours)&quot;" newline="True"/>
+        </body>
+    </function>
+    <function name="printheader" type="None" variable="">
+        <parameters/>
+        <body>
+            <output expression="&quot;WEEKLY TIMESHEET&quot;" newline="True"/>
+            <output expression="&quot;Day | Hours | Gross(MNT)&quot;" newline="True"/>
+        </body>
+    </function>
+</flowgorithm>
